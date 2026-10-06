@@ -225,8 +225,62 @@ ulang frontend (sudah tercakup di `--build`).
 
 ## Troubleshooting
 
-- **Sertifikat custom domain gagal**: cek `docker compose logs caddy`. Pastikan
-  A record sudah mengarah ke IP VPS dan `SAAS_ASK_TOKEN` sama di Caddy & backend.
-- **Platform tidak bisa diakses**: pastikan record Cloudflare proxied dan SSL
-  mode Full (strict) serta Origin Certificate terpasang di `certs/`.
-- **Ask endpoint 403**: domain belum terdaftar di `venue_domains`, atau token salah.
+### Caddy tidak muncul di `docker compose ps`
+
+Artinya container Caddy gagal start. Penyebab umum:
+
+1. **Port 80/443 sudah dipakai proses lain** (paling sering: **nginx** atau
+   Apache yang jalan di host). Cek:
+
+   ```bash
+   sudo ss -ltnp | grep -E ':80|:443'
+   ```
+
+   Kalau ada nginx/apache, **matikan** (Caddy yang jadi reverse proxy):
+
+   ```bash
+   sudo systemctl stop nginx && sudo systemctl disable nginx
+   # atau: sudo systemctl stop apache2
+   ```
+
+   Lalu jalankan ulang: `docker compose up -d caddy`.
+
+2. **File cert belum ada** (`certs/origin.crt` / `certs/origin.key`). Cek log:
+   `docker compose logs caddy`.
+
+3. **Caddyfile error**. Validasi:
+
+   ```bash
+   docker compose run --rm caddy caddy validate --config /etc/caddy/Caddyfile
+   ```
+
+### Backend crash-loop (`Restarting`)
+
+Lihat log: `docker compose logs backend`. Penyebab umum:
+
+- `DATABASE_URL` salah / password beda dengan volume Postgres lama. Bila baru
+  ganti password: `docker compose down -v` (hapus data) lalu `up` ulang.
+- Migration belum jalan. Seharusnya otomatis; cek `docker compose logs migrate`.
+
+### Frontend masih image lama setelah `git pull`
+
+`docker compose up -d` tanpa `--build` tidak rebuild image. Selalu pakai:
+
+```bash
+docker compose up -d --build
+```
+
+### Sertifikat custom domain gagal
+
+- Cek `docker compose logs caddy`.
+- Pastikan A record domain mengarah ke IP VPS dan `SAAS_ASK_TOKEN` sama di
+  Caddy & backend.
+
+### Platform tidak bisa diakses
+
+- Pastikan record Cloudflare proxied, SSL mode **Full (strict)**, dan Origin
+  Certificate terpasang di `certs/`.
+
+### Ask endpoint 403
+
+- Domain belum terdaftar di `venue_domains`, atau token salah.
