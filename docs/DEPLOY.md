@@ -225,6 +225,34 @@ ulang frontend (sudah tercakup di `--build`).
 
 ## Troubleshooting
 
+### `ERR_CERT_AUTHORITY_INVALID` / "Your connection is not private"
+
+**Penyebab paling umum: record DNS di Cloudflare masih DNS-only (grey cloud),
+bukan Proxied (orange).**
+
+Cloudflare **Origin Certificate** hanya dipercaya oleh Cloudflare, **bukan**
+oleh browser. Jadi:
+
+- Bila DNS **Proxied (orange)**: browser ↔ Cloudflare (cert publik valid) ↔
+  origin Caddy (origin cert). Browser aman. ✅
+- Bila DNS **DNS-only (grey)**: browser ↔ origin Caddy langsung → browser
+  melihat origin cert → **ERR_CERT_AUTHORITY_INVALID**. ❌
+
+**Perbaikan:**
+
+1. Cloudflare Dashboard → **DNS** → pastikan record `lapanganku.id` dan
+   `*.lapanganku.id` berstatus **Proxied** (ikon awan **oranye**), bukan abu-abu.
+2. **SSL/TLS → Overview** → mode **Full (strict)**.
+3. Tunggu beberapa menit (propagasi), lalu coba lagi.
+
+> Catatan HSTS: kalau browser menolak karena HSTS, buka di jendela
+> incognito/private, atau hapus HSTS untuk domain ini (Chrome:
+> `chrome://net-internals/#hsts` → *Delete domain security policies*).
+
+> Jangan pakai DNS-only kecuali kamu mengganti sertifikat Caddy dengan Let's
+> Encrypt asli (bukan Origin Certificate). Konfigurasi project ini memang
+> dirancang untuk **Proxied + Origin Certificate**.
+
 ### Caddy tidak muncul di `docker compose ps`
 
 Artinya container Caddy gagal start. Penyebab umum:
