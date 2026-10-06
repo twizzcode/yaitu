@@ -223,11 +223,39 @@ Ini juga menyelesaikan masalah **apex domain** yang tidak bisa memakai CNAME.
 ```bash
 git pull
 docker compose up -d --build
-docker compose run --rm migrate   # bila ada migration baru
 ```
 
-Catatan: bila mengubah `ROOT_DOMAIN`/`PUBLIC_ROOT_URL` di `.env`, wajib build
-ulang frontend (sudah tercakup di `--build`).
+Migration jalan otomatis saat `up` (service `migrate`). Bila mengubah
+`ROOT_DOMAIN`/`PUBLIC_ROOT_URL` di `.env`, wajib build ulang frontend
+(sudah tercakup di `--build`).
+
+## Data & Volume
+
+Data PostgreSQL disimpan di **volume Docker** (`postgres_data`), terpisah dari
+container. Jadi:
+
+| Perintah | Container | Data DB |
+|---|---|---|
+| `docker compose stop` | dihentikan | **aman** |
+| `docker compose down` | dihapus | **aman** (volume tetap) |
+| `docker compose down -v` | dihapus | **HAPUS permanen** |
+
+> **Jangan** pakai `down -v` di produksi kecuali memang ingin reset total.
+> Untuk backup, lihat `pg_dump` (contoh di bawah).
+
+Backup:
+
+```bash
+docker compose exec -T postgres \
+  pg_dump -U lapanganku lapanganku > backup-$(date +%F).sql
+```
+
+Restore:
+
+```bash
+cat backup-2026-10-07.sql | docker compose exec -T postgres \
+  psql -U lapanganku -d lapanganku
+```
 
 ## Troubleshooting
 

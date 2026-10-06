@@ -13,10 +13,10 @@ help: ## Tampilkan daftar perintah
 db: ## Start PostgreSQL dev + jalankan migration
 	docker compose -f compose.dev.yaml up -d
 
-db-down: ## Hentikan PostgreSQL dev
+db-down: ## Hentikan PostgreSQL dev (data tetap tersimpan)
 	docker compose -f compose.dev.yaml down
 
-db-reset: ## Hapus data dev lalu start ulang + migration
+db-reset: ## HAPUS data dev lalu start ulang + migration (destruktif!)
 	docker compose -f compose.dev.yaml down -v
 	docker compose -f compose.dev.yaml up -d
 

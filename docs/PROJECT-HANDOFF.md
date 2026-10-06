@@ -2,6 +2,8 @@
 
 Dokumen ini menjadi sumber konteks utama untuk developer atau agent berikutnya. Baca sebelum mengubah kode. Kondisi yang dicatat sesuai workspace pada 3 Oktober 2026.
 
+> Ringkasan singkat untuk agent ada di [`AGENTS.md`](../AGENTS.md) (root repo).
+
 ## Current Stopping Point
 
 Abstraksi **workspace sudah dihapus**. Model sekarang langsung `User -> Venue`

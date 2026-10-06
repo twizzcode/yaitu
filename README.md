@@ -2,9 +2,8 @@
 
 SaaS manajemen venue dan booking lapangan. Backend memakai Go + PostgreSQL. Frontend memakai SvelteKit 3, Svelte 5, Tailwind CSS 4, dan shadcn-svelte.
 
-Dokumentasi handoff lengkap untuk developer atau agent berikutnya ada di:
-
-- [`docs/PROJECT-HANDOFF.md`](docs/PROJECT-HANDOFF.md)
+> **Untuk AI agent / developer baru:** baca [`AGENTS.md`](AGENTS.md) dulu.
+> Dokumentasi handoff lengkap ada di [`docs/PROJECT-HANDOFF.md`](docs/PROJECT-HANDOFF.md).
 
 ## Model Produk
 
