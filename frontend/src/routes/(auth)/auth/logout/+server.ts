@@ -1,5 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { API_URL } from '$app/env/private';
 
 export const POST = (async ({ cookies, fetch }) => {
 	const session = cookies.get('session');
@@ -12,7 +13,7 @@ export const POST = (async ({ cookies, fetch }) => {
 
 	try {
 		response = await fetch(
-			'http://localhost:8080/api/auth/logout',
+			`${API_URL}/api/auth/logout`,
 			{
 				method: 'POST',
 				headers: {

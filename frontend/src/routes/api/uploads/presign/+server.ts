@@ -1,5 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { API_URL } from '$app/env/private';
 
 type PresignResponse = {
 	upload_url: string;
@@ -33,7 +34,7 @@ export const POST: RequestHandler = async ({ request, cookies, fetch }) => {
 	let response: Response;
 
 	try {
-		response = await fetch('http://localhost:8080/api/uploads/presign', {
+		response = await fetch(`${API_URL}/api/uploads/presign`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

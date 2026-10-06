@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
+import { API_URL } from '$app/env/private';
 
 export const actions = {
 	default: async ({ request, cookies, fetch, url }) => {
@@ -21,7 +22,7 @@ export const actions = {
 		let response: Response;
 
 		try {
-			response = await fetch('http://localhost:8080/api/auth/login', {
+			response = await fetch(`${API_URL}/api/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

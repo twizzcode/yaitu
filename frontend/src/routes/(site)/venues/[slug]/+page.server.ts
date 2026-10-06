@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 type PublicCourt = {
 	id: string;
@@ -24,7 +25,7 @@ export const load = (async ({ fetch, params }) => {
 
 	try {
 		response = await fetch(
-			`http://localhost:8080/api/public/venues/${encodeURIComponent(params.slug)}`
+			`${API_URL}/api/public/venues/${encodeURIComponent(params.slug)}`
 		);
 	} catch {
 		error(503, 'Server sedang tidak tersedia');

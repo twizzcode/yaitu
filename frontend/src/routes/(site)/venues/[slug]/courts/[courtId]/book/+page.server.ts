@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 type PublicCourt = {
 	id: string;
@@ -67,7 +68,7 @@ export const load = (async ({ fetch, params, url }) => {
 
 	try {
 		venueResponse = await fetch(
-			`http://localhost:8080/api/public/venues/${encodeURIComponent(params.slug)}`
+			`${API_URL}/api/public/venues/${encodeURIComponent(params.slug)}`
 		);
 	} catch {
 		error(503, 'Server sedang tidak tersedia');
@@ -102,7 +103,7 @@ export const load = (async ({ fetch, params, url }) => {
 
 	try {
 		availabilityResponse = await fetch(
-			`http://localhost:8080/api/courts/${encodeURIComponent(court.id)}/availability?date=${encodeURIComponent(date)}`
+			`${API_URL}/api/courts/${encodeURIComponent(court.id)}/availability?date=${encodeURIComponent(date)}`
 		);
 	} catch {
 		error(503, 'Server sedang tidak tersedia');
@@ -172,7 +173,7 @@ export const actions = {
 
 		try {
 			response = await fetch(
-				'http://localhost:8080/api/bookings',
+				`${API_URL}/api/bookings`,
 				{
 					method: 'POST',
 					headers: {

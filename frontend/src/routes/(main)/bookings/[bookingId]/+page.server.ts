@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 type BookingDetail = {
 	id: string;
@@ -54,11 +55,11 @@ export const load = (async ({ cookies, fetch, params, url }) => {
 	try {
 		[response, paymentResponse] = await Promise.all([
 			fetch(
-				`http://localhost:8080/api/bookings/${encodeURIComponent(params.bookingId)}`,
+				`${API_URL}/api/bookings/${encodeURIComponent(params.bookingId)}`,
 				{ headers }
 			),
 			fetch(
-				`http://localhost:8080/api/bookings/${encodeURIComponent(params.bookingId)}/payment`,
+				`${API_URL}/api/bookings/${encodeURIComponent(params.bookingId)}/payment`,
 				{ headers }
 			)
 		]);
@@ -109,7 +110,7 @@ export const actions = {
 		let response: Response;
 
 		try {
-			response = await fetch('http://localhost:8080/api/payments', {
+			response = await fetch(`${API_URL}/api/payments`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -153,7 +154,7 @@ export const actions = {
 
 		try {
 			response = await fetch(
-				`http://localhost:8080/api/bookings/${encodeURIComponent(params.bookingId)}/payment`,
+				`${API_URL}/api/bookings/${encodeURIComponent(params.bookingId)}/payment`,
 				{
 					headers: { Cookie: `session=${session}` }
 				}

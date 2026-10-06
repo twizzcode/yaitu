@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { PUBLIC_ROOT_DOMAIN } from '$app/env/public';
 import type { Actions, PageServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 type CreatedVenue = {
 	id: string;
@@ -25,7 +26,7 @@ export const load = (async ({ cookies, fetch, parent }) => {
 	let venuesResponse: Response;
 
 	try {
-		venuesResponse = await fetch('http://localhost:8080/api/venues', {
+		venuesResponse = await fetch(`${API_URL}/api/venues`, {
 			headers: {
 				Cookie: `session=${session}`
 			}
@@ -123,7 +124,7 @@ export const actions = {
 		let response: Response;
 
 		try {
-			response = await fetch('http://localhost:8080/api/venues', {
+			response = await fetch(`${API_URL}/api/venues`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

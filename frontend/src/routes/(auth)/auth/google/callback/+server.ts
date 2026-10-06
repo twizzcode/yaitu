@@ -1,5 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { API_URL } from '$app/env/private';
 
 type CallbackResponse = {
 	session_token: string;
@@ -25,7 +26,7 @@ export const GET = (async ({ cookies, fetch, url }) => {
 
 	try {
 		response = await fetch(
-			'http://localhost:8080/api/auth/google/callback',
+			`${API_URL}/api/auth/google/callback`,
 			{
 				method: 'POST',
 				headers: {

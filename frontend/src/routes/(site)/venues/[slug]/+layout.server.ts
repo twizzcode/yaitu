@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 type User = {
 	id: string;
@@ -20,7 +21,7 @@ export const load = (async ({ cookies, fetch }) => {
 
 	try {
 		response = await fetch(
-			'http://localhost:8080/api/auth/me',
+			`${API_URL}/api/auth/me`,
 			{
 				headers: {
 					Cookie: `session=${session}`

@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 type Venue = {
 	id: string;
@@ -99,7 +100,7 @@ export const actions = {
 
 		try {
 			response = await fetch(
-				`http://localhost:8080/api/venues/${encodeURIComponent(params.venueSlug)}`,
+				`${API_URL}/api/venues/${encodeURIComponent(params.venueSlug)}`,
 				{
 					method: 'PUT',
 					headers: {

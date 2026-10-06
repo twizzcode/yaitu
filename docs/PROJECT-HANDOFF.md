@@ -216,7 +216,9 @@ Variabel frontend dideklarasikan di `frontend/src/env.ts` memakai SvelteKit 3
 Docker Compose). `PUBLIC_ROOT_DOMAIN`/`PUBLIC_ROOT_URL` bersifat static
 (di-inline saat build) sehingga dikirim sebagai build arg dari compose.
 
-**Known gap:** origin backend hardcoded `http://localhost:8080` pada banyak `+page.server.ts`/`+server.ts`. Sebelum deployment, pindahkan ke private environment variable, misalnya `API_URL`.
+**Backend origin:** frontend memakai private env `API_URL` (default
+`http://localhost:8080` untuk dev, `http://backend:8080` di Docker Compose).
+Semua `+page.server.ts`/`+server.ts` sudah memakai `API_URL`.
 
 ## 6. Menjalankan Proyek
 
@@ -686,10 +688,9 @@ Fitur lain belum dibuat:
 
 2. **Cookie production belum konsisten aman.** Backend login dan frontend central login hardcode `Secure=false`. Gunakan environment-aware secure cookie sebelum deploy HTTPS.
 
-3. **Backend API URL frontend masih hardcoded di banyak `+page.server.ts`.**
-   `hooks.ts`, `domains/+page.server.ts`, dan `bookings/[bookingId]/+page.server.ts`
-   sudah pakai `API_URL`, tetapi file lain masih memakai `http://localhost:8080`.
-   Pindahkan semuanya ke `API_URL`.
+3. **Backend API URL frontend — SUDAH DIPERBAIKI.** Semua `+page.server.ts` /
+   `+server.ts` kini memakai private env `API_URL` (default dev
+   `http://localhost:8080`, produksi `http://backend:8080` lewat compose).
 
 4. **Custom-domain hook sudah dibuat.** `hooks.ts` meresolve custom domain
    lewat `/api/resolve-domain` dan merutekan ke storefront venue. Sisa: uji

@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 export const load = (async ({ parent }) => {
 	const { venue } = await parent();
@@ -15,7 +16,7 @@ export const actions = {
 		}
 
 		const venueResponse = await fetch(
-			`http://localhost:8080/api/venues/${encodeURIComponent(params.venueSlug)}`,
+			`${API_URL}/api/venues/${encodeURIComponent(params.venueSlug)}`,
 			{
 				headers: {
 					Cookie: `session=${session}`
@@ -79,7 +80,7 @@ export const actions = {
 
 		try {
 			response = await fetch(
-				`http://localhost:8080/api/venues/${venue.id}/courts`,
+				`${API_URL}/api/venues/${venue.id}/courts`,
 				{
 					method: 'POST',
 					headers: {

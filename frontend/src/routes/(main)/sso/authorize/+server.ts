@@ -4,6 +4,7 @@ import {
 } from '$app/env/public';
 import { error, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { API_URL } from '$app/env/private';
 
 type AuthorizeResponse = {
 	code: string;
@@ -70,7 +71,7 @@ export const GET = (async ({ cookies, fetch, url }) => {
 
 	try {
 		response = await fetch(
-			'http://localhost:8080/api/sso/authorize',
+			`${API_URL}/api/sso/authorize`,
 			{
 				method: 'POST',
 				headers: {

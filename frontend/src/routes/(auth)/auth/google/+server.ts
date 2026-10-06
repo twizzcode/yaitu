@@ -1,5 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { API_URL } from '$app/env/private';
 
 type StartResponse = {
 	authorization_url: string;
@@ -8,7 +9,7 @@ type StartResponse = {
 export const GET = (async ({ fetch, url }) => {
 	const next = url.searchParams.get('next') ?? '/admin';
 	const endpoint = new URL(
-		'http://localhost:8080/api/auth/google/start'
+		`${API_URL}/api/auth/google/start`
 	);
 
 	endpoint.searchParams.set('next', next);

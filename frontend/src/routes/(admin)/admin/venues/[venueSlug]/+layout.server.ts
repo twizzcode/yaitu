@@ -1,5 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
+import { API_URL } from '$app/env/private';
 
 type Venue = {
 	id: string;
@@ -40,7 +41,7 @@ export const load = (async ({ cookies, fetch, params, parent }) => {
 	let venuesResponse: Response;
 
 	try {
-		venuesResponse = await fetch('http://localhost:8080/api/venues', {
+		venuesResponse = await fetch(`${API_URL}/api/venues`, {
 			headers
 		});
 	} catch {

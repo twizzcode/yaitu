@@ -1,5 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { API_URL } from '$app/env/private';
 
 type ExchangeResponse = {
 	session_token: string;
@@ -41,7 +42,7 @@ export const GET = (async ({ cookies, fetch, url }) => {
 
 	try {
 		response = await fetch(
-			'http://localhost:8080/api/sso/exchange',
+			`${API_URL}/api/sso/exchange`,
 			{
 				method: 'POST',
 				headers: {

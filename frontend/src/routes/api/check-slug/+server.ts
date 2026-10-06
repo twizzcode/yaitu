@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { API_URL } from '$app/env/private';
 import { validateUsername } from '#lib/validation.js';
 
 /**
@@ -13,8 +14,6 @@ import { validateUsername } from '#lib/validation.js';
  * Saat backend menyediakan endpoint khusus (mis. GET /api/venues/slug-available),
  * cukup ganti pemanggilan di bawah tanpa mengubah kontrak respons frontend.
  */
-
-const API_URL = 'http://localhost:8080';
 
 export const GET: RequestHandler = async ({ url, fetch }) => {
 	const slug = (url.searchParams.get('slug') ?? '')

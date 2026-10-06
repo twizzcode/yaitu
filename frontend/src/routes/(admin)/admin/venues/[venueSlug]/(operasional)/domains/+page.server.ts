@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { PUBLIC_ROOT_DOMAIN } from '$app/env/public';
-import { SERVER_PUBLIC_IP } from '$app/env/private';
+import { SERVER_PUBLIC_IP, API_URL } from '$app/env/private';
 import type { Actions, PageServerLoad } from './$types';
 
 type Domain = {
@@ -27,7 +27,7 @@ export const load = (async ({ cookies, fetch, params, parent }) => {
 
 	try {
 		response = await fetch(
-			`http://localhost:8080/api/venues/${encodeURIComponent(params.venueSlug)}/domains`,
+			`${API_URL}/api/venues/${encodeURIComponent(params.venueSlug)}/domains`,
 			{
 				headers: {
 					Cookie: `session=${session}`
@@ -81,7 +81,7 @@ export const actions = {
 
 		try {
 			response = await fetch(
-				`http://localhost:8080/api/venues/${encodeURIComponent(params.venueSlug)}/domains`,
+				`${API_URL}/api/venues/${encodeURIComponent(params.venueSlug)}/domains`,
 				{
 					method: 'POST',
 					headers: {
@@ -129,7 +129,7 @@ export const actions = {
 
 		try {
 			response = await fetch(
-				`http://localhost:8080/api/venues/${encodeURIComponent(params.venueSlug)}/domains/${encodeURIComponent(domainId)}/verify`,
+				`${API_URL}/api/venues/${encodeURIComponent(params.venueSlug)}/domains/${encodeURIComponent(domainId)}/verify`,
 				{
 					method: 'POST',
 					headers: {
@@ -174,7 +174,7 @@ export const actions = {
 
 		try {
 			response = await fetch(
-				`http://localhost:8080/api/venues/${encodeURIComponent(params.venueSlug)}/domains/${encodeURIComponent(domainId)}`,
+				`${API_URL}/api/venues/${encodeURIComponent(params.venueSlug)}/domains/${encodeURIComponent(domainId)}`,
 				{
 					method: 'DELETE',
 					headers: {
