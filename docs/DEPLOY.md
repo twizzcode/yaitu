@@ -11,20 +11,22 @@ Di server (setelah Docker terpasang & repo sudah di-clone):
 cp .env.production.example .env      # lalu isi nilainya
 mkdir -p certs                        # taruh origin.crt & origin.key di sini
 docker compose up -d --build          # build + start semua service
-docker compose run --rm migrate       # jalankan migration DB
 docker compose ps                     # pastikan semua "Up"
 ```
 
 > **Kamu tidak perlu build manual.** `docker compose up -d --build` build
 > image langsung di server. Tidak ada langkah `bun run build` / `go build`
 > manual.
+>
+> **Migration jalan otomatis.** Service `migrate` dijalankan sebelum backend
+> (backend menunggu `service_completed_successfully`). Tidak perlu langkah
+> migration manual.
 
 Update berikutnya cukup:
 
 ```bash
 git pull
 docker compose up -d --build
-docker compose run --rm migrate
 ```
 
 ## Arsitektur
@@ -167,8 +169,8 @@ docker compose logs -f backend
 
 ## 5. Migration database
 
-Jalankan migration (sekali, dan tiap ada migration baru) memakai service
-`migrate`:
+Migration **jalan otomatis** saat `docker compose up` (service `migrate`
+dijalankan sebelum backend). Untuk menjalankannya manual:
 
 ```bash
 docker compose run --rm migrate
@@ -177,13 +179,8 @@ docker compose run --rm migrate
 Cek versi:
 
 ```bash
-docker compose run --rm migrate \
-  -path /migrations \
-  -database "postgres://lapanganku:<PASSWORD>@postgres:5432/lapanganku?sslmode=disable" \
-  version
+docker compose run --rm migrate version
 ```
-
-> Service `migrate` ada di profil `tools`, jadi tidak ikut `up` biasa.
 
 ## 6. Verifikasi
 

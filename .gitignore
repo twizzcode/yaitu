@@ -3,7 +3,9 @@
 .env.production
 
 # Sertifikat TLS (berisi private key) — jangan commit.
-certs/
+# Folder tetap dipertahankan lewat .gitkeep, isinya diabaikan.
+certs/*
+!certs/.gitkeep
 
 # Kredensial lokal.
 cookies.txt

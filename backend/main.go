@@ -42,7 +42,9 @@ type loginUserRequest struct {
 }
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// Timeout startup yang longgar: mencakup ping DB dan discovery OIDC Google.
+	// Di VPS kecil / koneksi lambat, 5 detik terlalu pendek.
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	databaseURL := os.Getenv("DATABASE_URL")
@@ -82,16 +84,14 @@ func main() {
 		os.Getenv("GOOGLE_REDIRECT_URL"),
 	)
 
-	if googleClientID == "" {
-		log.Fatal("GOOGLE_CLIENT_ID belum diatur")
-	}
+	// Google OAuth opsional. Bila kredensial tidak lengkap, fitur login Google
+	// dinonaktifkan (bukan menggagalkan startup) agar deploy lain tetap jalan.
+	googleEnabled := googleClientID != "" &&
+		googleClientSecret != "" &&
+		googleRedirectURL != ""
 
-	if googleClientSecret == "" {
-		log.Fatal("GOOGLE_CLIENT_SECRET belum diatur")
-	}
-
-	if googleRedirectURL == "" {
-		log.Fatal("GOOGLE_REDIRECT_URL belum diatur")
+	if !googleEnabled {
+		log.Println("Google OAuth tidak dikonfigurasi; login Google dinonaktifkan")
 	}
 
 	db, err := pgxpool.New(ctx, databaseURL)
@@ -106,24 +106,35 @@ func main() {
 
 	log.Println("Berhasil terhubung ke PostgreSQL")
 
-	googleProvider, err := oidc.NewProvider(
-		ctx,
-		"https://accounts.google.com",
-	)
-	if err != nil {
-		log.Fatalf("menghubungkan ke Google OIDC: %v", err)
-	}
+	var googleOAuthConfig *oauth2.Config
+	var googleIDTokenVerifier *oidc.IDTokenVerifier
 
-	googleOAuthConfig := &oauth2.Config{
-		ClientID:     googleClientID,
-		ClientSecret: googleClientSecret,
-		RedirectURL:  googleRedirectURL,
-		Endpoint:     googleProvider.Endpoint(),
-		Scopes: []string{
-			oidc.ScopeOpenID,
-			oidc.ScopeEmail,
-			oidc.ScopeProfile,
-		},
+	if googleEnabled {
+		googleProvider, err := oidc.NewProvider(
+			ctx,
+			"https://accounts.google.com",
+		)
+		if err != nil {
+			log.Fatalf("menghubungkan ke Google OIDC: %v", err)
+		}
+
+		googleOAuthConfig = &oauth2.Config{
+			ClientID:     googleClientID,
+			ClientSecret: googleClientSecret,
+			RedirectURL:  googleRedirectURL,
+			Endpoint:     googleProvider.Endpoint(),
+			Scopes: []string{
+				oidc.ScopeOpenID,
+				oidc.ScopeEmail,
+				oidc.ScopeProfile,
+			},
+		}
+
+		googleIDTokenVerifier = googleProvider.Verifier(
+			&oidc.Config{
+				ClientID: googleClientID,
+			},
+		)
 	}
 
 	storage, err := newStorageConfig(ctx)
@@ -142,18 +153,14 @@ func main() {
 	}
 
 	app := &application{
-		db:             db,
-		rootDomain:     rootDomain,
-		serverPublicIP: serverPublicIP,
-		saasAskToken:   saasAskToken,
-		googleOAuthConfig: googleOAuthConfig,
-		googleIDTokenVerifier: googleProvider.Verifier(
-			&oidc.Config{
-				ClientID: googleClientID,
-			},
-		),
-		storage: storage,
-		midtrans: midtrans,
+		db:                    db,
+		rootDomain:            rootDomain,
+		serverPublicIP:        serverPublicIP,
+		saasAskToken:          saasAskToken,
+		googleOAuthConfig:     googleOAuthConfig,
+		googleIDTokenVerifier: googleIDTokenVerifier,
+		storage:               storage,
+		midtrans:              midtrans,
 	}
 
 	if err := app.syncPlatformDomains(ctx); err != nil {

@@ -70,6 +70,15 @@ func (app *application) startGoogleAuthHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	if app.googleOAuthConfig == nil {
+		http.Error(
+			w,
+			"login Google tidak tersedia",
+			http.StatusServiceUnavailable,
+		)
+		return
+	}
+
 	state, err := generateOAuthValue()
 	if err != nil {
 		log.Printf("membuat OAuth state: %v", err)
@@ -278,6 +287,15 @@ func (app *application) googleAuthCallbackHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	if app.googleOAuthConfig == nil || app.googleIDTokenVerifier == nil {
+		http.Error(
+			w,
+			"login Google tidak tersedia",
+			http.StatusServiceUnavailable,
+		)
+		return
+	}
+
 	var input googleAuthCallbackRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {

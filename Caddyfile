@@ -18,18 +18,16 @@
 #
 # Cloudflare (proxy) yang terminate SSL untuk browser. Origin Caddy memakai
 # Cloudflare Origin Certificate agar Cloudflare bisa verifikasi (Full strict).
+#
+# Catatan: wildcard ditulis "*.<domain>" lewat env terpisah (WILDCARD_DOMAIN)
+# karena Caddy tidak bisa menggabungkan "*" dengan substitusi {$VAR} langsung.
 # ---------------------------------------------------------------------------
-{$ROOT_DOMAIN}, *{$ROOT_DOMAIN} {
+{$ROOT_DOMAIN}, {$WILDCARD_DOMAIN} {
 	tls /certs/origin.crt /certs/origin.key
 
 	encode zstd gzip
 
-	reverse_proxy frontend:3000 {
-		header_up Host {host}
-		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
-		header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy frontend:3000
 }
 
 # ---------------------------------------------------------------------------
@@ -48,12 +46,7 @@
 
 	encode zstd gzip
 
-	reverse_proxy frontend:3000 {
-		header_up Host {host}
-		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
-		header_up X-Forwarded-Proto {scheme}
-	}
+	reverse_proxy frontend:3000
 }
 
 # Redirect HTTP -> HTTPS untuk semua hostname.
