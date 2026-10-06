@@ -3,6 +3,11 @@
 Panduan deploy produksi: VPS sendiri, semua service via Docker Compose,
 Caddy sebagai reverse proxy dengan SSL otomatis.
 
+> **Dev vs Prod.** Dokumen ini untuk **produksi** (`compose.yaml` + `.env`).
+> Untuk pengembangan lokal, lihat README (`compose.dev.yaml` + `.env.local`,
+> backend & frontend native). Keduanya terpisah agar rahasia produksi tidak
+> terbaca saat dev.
+
 ## Ringkas: pertama kali deploy
 
 Di server (setelah Docker terpasang & repo sudah di-clone):
@@ -114,7 +119,8 @@ Folder `certs/` sudah masuk `.gitignore` (berisi private key — jangan commit).
 
 ## 3. Konfigurasi environment
 
-**Semua environment variable cukup diisi di SATU file: `.env` di root repo.**
+**Semua environment variable produksi cukup diisi di SATU file: `.env` di root
+repo.** (Dev memakai `.env.local` + `compose.dev.yaml` yang terpisah.)
 
 ```bash
 cp .env.production.example .env

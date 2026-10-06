@@ -41,43 +41,38 @@ http://localhost:8080                      Go API
 
 ## Menjalankan Lokal
 
-### 1. PostgreSQL
+Pengembangan memakai PostgreSQL via Docker, sedangkan backend & frontend
+dijalankan native (hot reload). Prod memakai Docker Compose penuh — lihat
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
+
+### Ringkas (Makefile)
 
 ```bash
-docker compose up -d
-docker compose ps
+make db        # start PostgreSQL dev + migration (otomatis)
+make backend   # terminal 1: jalankan Go API (:8080), baca .env.local
+make frontend  # terminal 2: jalankan SvelteKit dev (:5173)
 ```
 
-### 2. Migration
+`make help` untuk daftar lengkap perintah.
 
-Proyek memakai CLI [`golang-migrate`](https://github.com/golang-migrate/migrate). Dari folder `backend`:
+### Manual
+
+#### 1. PostgreSQL + Migration
 
 ```bash
-/home/twizzcode/go/bin/migrate \
-  -path migrations \
-  -database "postgres://lapanganku:lapanganku@localhost:5432/lapanganku?sslmode=disable" \
-  up
+docker compose -f compose.dev.yaml up -d
 ```
 
-Cek versi:
+Service `migrate` ikut jalan otomatis, jadi tidak perlu install CLI migrate.
+
+#### 2. Backend
+
+Backend membaca variabel dari `.env.local` (salin dari `.env.local.example`):
 
 ```bash
-/home/twizzcode/go/bin/migrate \
-  -path migrations \
-  -database "postgres://lapanganku:lapanganku@localhost:5432/lapanganku?sslmode=disable" \
-  version
-```
-
-Versi terkini: `19`.
-
-### 3. Backend
-
-Bash/Zsh:
-
-```bash
+cp .env.local.example .env.local   # sekali saja
 cd backend
-export DATABASE_URL="postgres://lapanganku:lapanganku@localhost:5432/lapanganku?sslmode=disable"
-export ROOT_DOMAIN="lvh.me"
+set -a && source ../.env.local && set +a
 go run .
 ```
 
@@ -85,18 +80,22 @@ Fish:
 
 ```fish
 cd backend
-set -x DATABASE_URL "postgres://lapanganku:lapanganku@localhost:5432/lapanganku?sslmode=disable"
-set -x ROOT_DOMAIN "lvh.me"
+for line in (cat ../.env.local | grep -v '^#' | grep '=')
+    set -x (echo $line | cut -d= -f1) (echo $line | cut -d= -f2-)
+end
 go run .
 ```
 
-### 4. Frontend
+#### 3. Frontend
 
 ```bash
 cd frontend
 bun install
 bun run dev --host 0.0.0.0
 ```
+
+Frontend dev memakai default `lvh.me` / `localhost:8080` (lihat
+`frontend/src/env.ts`), jadi tidak butuh file env tambahan.
 
 ## Verifikasi
 
@@ -122,7 +121,7 @@ Status terakhir:
 
 Panduan lengkap ada di [`docs/DEPLOY.md`](docs/DEPLOY.md). Ringkas:
 
-- Semua service via Docker Compose (`caddy`, `frontend`, `backend`, `postgres`).
+- Semua service via Docker Compose (`caddy`, `frontend`, `backend`, `postgres`, `migrate`).
 - Caddy reverse proxy + SSL otomatis (Cloudflare Origin Cert untuk platform,
   on-demand TLS Let's Encrypt untuk custom domain).
 - Custom domain: owner arahkan **A record** ke IP VPS, klik Verifikasi.
@@ -131,6 +130,9 @@ Panduan lengkap ada di [`docs/DEPLOY.md`](docs/DEPLOY.md). Ringkas:
 cp .env.production.example .env   # isi nilainya
 docker compose up -d --build
 ```
+
+> Dev memakai `compose.dev.yaml` + `.env.local`; prod memakai `compose.yaml` +
+> `.env`. Keduanya terpisah agar rahasia produksi tidak terbaca saat dev.
 
 ## Status Fitur
 

@@ -156,13 +156,30 @@ selalu di-skip agar tidak terjadi rekursi.
 - Cloudflare R2 (S3-compatible) untuk upload KTP via presigned URL
 - Deployment: VPS + Docker Compose + Caddy (reverse proxy + auto SSL)
 - `adapter-node` untuk frontend; panduan di `docs/DEPLOY.md`
-- Service `migrate` (profil `tools`) untuk menjalankan migration di server:
-  `docker compose run --rm migrate`
+- **Dev vs Prod dipisah:**
+  - `compose.dev.yaml` (dev): postgres + migrate, kredensial hardcoded, volume
+    `postgres_dev_data` terpisah.
+  - `compose.yaml` (prod): full stack (postgres, migrate, backend, frontend, caddy).
+  - `.env.local` (dev, gitignored) untuk backend native; `.env` (prod, gitignored)
+    untuk Docker Compose.
+  - `Makefile` menyediakan `make db`, `make backend`, `make frontend`, `make check`.
+- Service `migrate` jalan otomatis sebelum backend (prod) & saat `make db` (dev).
 - `.dockerignore` ada di `frontend/` dan `backend/` (mencegah `node_modules`
   ikut ke build context)
 - Belum ada CI
 
 ## 5. Environment Variables
+
+Ada tiga sumber env, dipisah tegas:
+
+| File | Untuk | Sumber |
+|---|---|---|
+| `.env.local` (gitignored) | Backend dev native | `.env.local.example` |
+| `.env` (gitignored) | Prod Docker Compose | `.env.production.example` |
+| default di `frontend/src/env.ts` | Frontend dev | — |
+
+`compose.dev.yaml` **hardcode** kredensial dev (tidak membaca `.env`), sehingga
+rahasia produksi tidak pernah tersentuh saat dev.
 
 Backend wajib:
 
@@ -222,61 +239,45 @@ Semua `+page.server.ts`/`+server.ts` sudah memakai `API_URL`.
 
 ## 6. Menjalankan Proyek
 
-### Database
+**Dev** dan **prod** dipisah:
+- Dev: `compose.dev.yaml` (hanya postgres + migrate) + `.env.local`, backend &
+  frontend native (hot reload).
+- Prod: `compose.yaml` (full stack) + `.env`.
+
+### Dev (ringkas)
 
 ```bash
-docker compose up -d
-docker compose ps
+make db        # start PostgreSQL dev + migration otomatis
+make backend   # terminal 1: Go API :8080 (baca .env.local)
+make frontend  # terminal 2: SvelteKit dev :5173
 ```
 
-### Migration
-
-Dari `backend`:
+Atau manual:
 
 ```bash
-/home/twizzcode/go/bin/migrate \
-  -path migrations \
-  -database "postgres://lapanganku:lapanganku@localhost:5432/lapanganku?sslmode=disable" \
-  up
+cp .env.local.example .env.local
+docker compose -f compose.dev.yaml up -d
+cd backend && set -a && source ../.env.local && set +a && go run .
+cd frontend && bun install && bun run dev --host 0.0.0.0
 ```
 
-Versi schema terkini: `19`, `dirty=false`.
-
-### Backend
-
-Fish:
-
-```fish
-cd backend
-set -x DATABASE_URL "postgres://lapanganku:lapanganku@localhost:5432/lapanganku?sslmode=disable"
-set -x ROOT_DOMAIN "lvh.me"
-go run .
-```
-
-### Frontend
-
-```bash
-cd frontend
-bun install
-bun run dev --host 0.0.0.0
-```
-
-Vite mengizinkan `.lvh.me` melalui `server.allowedHosts`.
+Versi schema terkini: `19`, `dirty=false`. Migration di dev berjalan otomatis
+via service `migrate` di `compose.dev.yaml` (tidak perlu CLI).
 
 ### Checks
 
 ```bash
-cd backend
-go test ./...
+make check      # backend test + frontend check
 ```
+
+Atau manual:
 
 ```bash
-cd frontend
-bun run check
-bun run build
+cd backend && go test ./...
+cd frontend && bun run check && bun run build
 ```
 
-Status terakhir: ketiganya lulus. Frontend memakai `adapter-node` untuk produksi.
+Status terakhir: semuanya lulus. Frontend memakai `adapter-node` untuk produksi.
 
 ## 7. Database Schema dan Migration
 

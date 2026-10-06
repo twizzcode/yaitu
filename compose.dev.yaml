@@ -1,0 +1,50 @@
+# =============================================================================
+# Lapanganku — stack pengembangan lokal (DEV)
+#
+# Hanya PostgreSQL + migration. Backend & frontend dijalankan native (host)
+# agar hot reload: lihat Makefile / README.
+#
+# Kredensial di-hardcode (bukan dari .env) supaya rahasia produksi di `.env`
+# tidak pernah terbaca saat dev.
+#
+# Jalankan:
+#   docker compose -f compose.dev.yaml up -d
+#   # atau: make db
+# =============================================================================
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: lapanganku
+      POSTGRES_USER: lapanganku
+      POSTGRES_PASSWORD: lapanganku
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Volume terpisah dari produksi (postgres_data) agar tidak bentrok.
+      - postgres_dev_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lapanganku -d lapanganku"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Menjalankan migration otomatis agar tidak perlu install CLI migrate.
+  migrate:
+    image: migrate/migrate:v4.18.1
+    volumes:
+      - ./backend/migrations:/migrations
+    command:
+      - "-path"
+      - "/migrations"
+      - "-database"
+      - "postgres://lapanganku:lapanganku@postgres:5432/lapanganku?sslmode=disable"
+      - "up"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  postgres_dev_data:

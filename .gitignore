@@ -1,6 +1,8 @@
 # Env produksi (berisi rahasia) — jangan commit.
 .env
 .env.production
+.env.local
+.env.*.local
 
 # Sertifikat TLS (berisi private key) — jangan commit.
 # Folder tetap dipertahankan lewat .gitkeep, isinya diabaikan.
