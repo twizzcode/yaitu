@@ -1,0 +1,2 @@
+ALTER TABLE auth_codes
+DROP COLUMN IF EXISTS family_id;

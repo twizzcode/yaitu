@@ -1,0 +1,10 @@
+# Env produksi (berisi rahasia) — jangan commit.
+.env
+.env.production
+
+# Sertifikat TLS (berisi private key) — jangan commit.
+certs/
+
+# Kredensial lokal.
+cookies.txt
+backend/main.txt

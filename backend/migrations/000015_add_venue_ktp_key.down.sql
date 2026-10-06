@@ -1,0 +1,2 @@
+ALTER TABLE venues
+DROP COLUMN IF EXISTS ktp_key;

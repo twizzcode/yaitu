@@ -1,0 +1,14 @@
+node_modules
+.svelte-kit
+build
+.output
+.vercel
+.netlify
+.wrangler
+.env
+.env.*
+!.env.example
+.DS_Store
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+Dockerfile

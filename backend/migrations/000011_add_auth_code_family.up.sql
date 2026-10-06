@@ -1,0 +1,2 @@
+ALTER TABLE auth_codes
+ADD COLUMN family_id UUID NOT NULL;

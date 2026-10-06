@@ -1,0 +1,3 @@
+ALTER TABLE venues
+DROP COLUMN IF EXISTS description,
+DROP COLUMN IF EXISTS logo_key;
